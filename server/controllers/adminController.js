@@ -19,4 +19,25 @@ async function getAllOrders(req, res) {
   }
 }
 
-module.exports = { getAllOrders };
+async function getAllFeedback(req, res) {
+    try {
+      const [feedbacks] = await db.query(`
+        SELECT feedback.*, users.name AS user_name 
+        FROM feedback 
+        JOIN users ON feedback.user_id = users.id
+        ORDER BY feedback.created_at DESC
+      `);
+  
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true, data: feedbacks }));
+  
+    } catch (err) {
+      console.error('Get All Feedback Error:', err);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, message: 'Failed to fetch feedback' }));
+    }
+  }
+  
+  module.exports = { getAllOrders, getAllFeedback };
+  
+

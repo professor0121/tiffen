@@ -4,6 +4,7 @@ const { handleOrderRoutes,getMyOrders,placeOrder,cancelOrder     } = require('..
 const { authMiddleware } = require('../middlewares/authMiddleware');
 const { createMenu, getMenu } = require('../controllers/menuController');
 const { giveFeedback } = require('../controllers/feedbackController');
+const { getAllOrders,getAllFeedback } = require('../controllers/adminController');
 
 
 function router(req, res) {
@@ -53,6 +54,16 @@ function router(req, res) {
   if (req.method === 'POST' && req.url === '/api/feedback') {
     return authMiddleware(req, res, giveFeedback);
   }
+
+  if (req.method === 'GET' && req.url === '/api/admin/orders') {
+    return authMiddleware(req, res, getAllOrders);
+  }
+
+  if (req.method === 'GET' && req.url === '/api/admin/feedback') {
+    return authMiddleware(req, res, getAllFeedback);
+  }
+  
+  
   
   
 
