@@ -71,4 +71,88 @@ async function getMyOrders(req, res) {
       );
     }
   }
-module.exports = { handleOrderRoutes,getMyOrders };
+
+  async function placeOrder(req, res) {
+    try {
+      let body = '';
+      req.on('data', (chunk) => {
+        body += chunk;
+      });
+  
+      req.on('end', async () => {
+        const { meal_type, quantity, delivery_time } = JSON.parse(body);
+  
+        if (!meal_type || !quantity || !delivery_time) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(
+            JSON.stringify({ success: false, message: 'All fields are required' })
+          );
+          return;
+        }
+  
+        // Assuming you have userId from auth middleware
+        const userId = req.userId; 
+  
+        const [result] = await db.query(
+          'INSERT INTO orders (user_id, meal_type, quantity, delivery_time, status, created_at) VALUES (?, ?, ?, ?, ?, NOW())',
+          [userId, meal_type, quantity, delivery_time, 'pending']
+        );
+  
+        res.writeHead(201, { 'Content-Type': 'application/json' });
+        res.end(
+          JSON.stringify({ success: true, message: 'Order placed successfully' })
+        );
+      });
+    } catch (err) {
+      console.error('Order Error:', err);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({ success: false, message: 'Failed to place order' })
+      );
+    }
+  }
+
+  async function cancelOrder(req, res) {
+    try {
+      let body = '';
+  
+      req.on('data', (chunk) => {
+        body += chunk;
+      });
+  
+      req.on('end', async () => {
+        const { order_id } = JSON.parse(body);
+        const userId = req.userId;
+  
+        if (!order_id) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ success: false, message: 'Order ID is required' }));
+        }
+  
+        const [orderCheck] = await db.query('SELECT * FROM orders WHERE id = ? AND user_id = ?', [order_id, userId]);
+  
+        if (orderCheck.length === 0) {
+          res.writeHead(404, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ success: false, message: 'Order not found or not yours' }));
+        }
+  
+        if (orderCheck[0].status !== 'pending') {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ success: false, message: 'Only pending orders can be cancelled' }));
+        }
+  
+        await db.query('UPDATE orders SET status = ? WHERE id = ?', ['cancelled', order_id]);
+  
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ success: true, message: 'Order cancelled successfully' }));
+      });
+  
+    } catch (err) {
+      console.error('Cancel Order Error:', err);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, message: 'Failed to cancel order' }));
+    }
+  }
+  
+  
+module.exports = { handleOrderRoutes,getMyOrders,placeOrder,cancelOrder };
