@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Tracking Test</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; }
+    h1 { text-align: center; }
+    .form { margin-bottom: 1rem; }
+    #messages { list-style: none; padding: 0; }
+    #messages li { background: #f0f0f0; margin: 0.5rem 0; padding: 0.5rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Socket.IO Order Tracker</h1>
+
+  <div class="form">
+    <label for="orderId">Order ID:</label>
+    <input id="orderId" type="text" placeholder="Enter order ID" />
+    <button id="trackBtn">Track Order</button>
+  </div>
+
+  <ul id="messages"></ul>
+
+  <!-- Socket.IO client library -->
+  <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+  <script>
+    const socket = io('http://localhost:3000');
+
+    socket.on('connect', () => {
+      const msg = document.createElement('li');
+      msg.textContent = `Connected as ${socket.id}`;
+      document.getElementById('messages').appendChild(msg);
+    });
+
+    socket.on('order-status-updated', (data) => {
+      const msg = document.createElement('li');
+      msg.textContent = `Order ${data.orderId} status: ${data.status}`;
+      document.getElementById('messages').appendChild(msg);
+    });
+
+    document.getElementById('trackBtn').addEventListener('click', () => {
+      const orderId = document.getElementById('orderId').value.trim();
+      if (!orderId) return;
+      socket.emit('track-order', orderId);
+      const msg = document.createElement('li');
+      msg.textContent = `Tracking order ${orderId}...`;
+      document.getElementById('messages').appendChild(msg);
+    });
+  </script>
+</body>
+</html>

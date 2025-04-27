@@ -1,6 +1,7 @@
 const http = require('http');
 const { router } = require('./routes/router');
 const dotenv = require('dotenv');
+const {initSocket} = require('./socket/socket');
 
 // Load environment variables from .env file
 dotenv.config();
@@ -9,7 +10,7 @@ dotenv.config();
 const server = http.createServer((req, res) => {
   router(req, res);
 });
-
+initSocket(server);
 // Start the server on port 3000
 server.listen(3000, () => {
   console.log('Server is running on http://localhost:3000');

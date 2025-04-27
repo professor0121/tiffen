@@ -1,15 +1,19 @@
 // routes/router.js
+const { URL } = require('url');
 const { registerUser, loginUser } = require('../controllers/userController');
-const { handleOrderRoutes,getMyOrders,placeOrder,cancelOrder     } = require('../controllers/orderController');
+const { handleOrderRoutes,getMyOrders,placeOrder,cancelOrder,trackOrder     } = require('../controllers/orderController');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 const { createMenu, getMenu } = require('../controllers/menuController');
 const { giveFeedback } = require('../controllers/feedbackController');
-const { getAllOrders,getAllFeedback } = require('../controllers/adminController');
-
+const { getAllOrders,getAllFeedback,updateOrderStatus } = require('../controllers/adminController');
+const { createSubscription, getSubscription,cancelSubscription } = require('../controllers/subscriptionController');
 
 function router(req, res) {
   const { url, method } = req;
     console.log(`Request URL: ${url}, Method: ${method}`);
+    const fullUrl = `http://${req.headers.host}${req.url}`;
+    const parsed = new URL(fullUrl);
+    const pathname = parsed.pathname;
 
   if (url === '/api/users/register' && method === 'POST') {
     return registerUser(req, res);
@@ -63,8 +67,29 @@ function router(req, res) {
     return authMiddleware(req, res, getAllFeedback);
   }
   
+   // Create a subscription
+   if (url === '/api/subscription' && method === 'POST') {
+    return authMiddleware(req, res, createSubscription);
+  }
+
+  // Get current user's latest subscription
+  if (url === '/api/subscription' && method === 'GET') {
+    return authMiddleware(req, res, getSubscription);
+  }
   
+  // Cancel Subscription
+if (url === '/api/subscription/cancel' && method === 'POST') {
+    return authMiddleware(req, res, cancelSubscription);
+  }
   
+  if (pathname === '/api/order/status' && method === 'GET') {
+    req.orderId = parsed.searchParams.get('order_id');
+    return authMiddleware(req, res, trackOrder);
+  }
+
+  if (pathname === '/api/admin/order/status' && method === 'PATCH') {
+    return authMiddleware(req, res, updateOrderStatus);
+  }
   
 
   // ... other routes ...

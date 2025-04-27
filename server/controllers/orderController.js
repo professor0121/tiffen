@@ -154,5 +154,51 @@ async function getMyOrders(req, res) {
     }
   }
   
+  async function trackOrder(req, res) {
+    try {
+      // req.orderId will be set by the router
+      const orderId = req.orderId;
+      const userId  = req.userId;
   
-module.exports = { handleOrderRoutes,getMyOrders,placeOrder,cancelOrder };
+      if (!orderId) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({
+          success: false,
+          message: 'order_id query parameter is required'
+        }));
+      }
+  
+      // Fetch the order, ensure it belongs to this user
+      const [rows] = await db.query(
+        `SELECT id, meal_type, quantity, delivery_time, status, created_at
+           FROM orders
+          WHERE id = ? AND user_id = ?`,
+        [orderId, userId]
+      );
+  
+      if (rows.length === 0) {
+        res.writeHead(404, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({
+          success: false,
+          message: 'Order not found'
+        }));
+      }
+  
+      // Return the order’s status and metadata
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: true,
+        data: rows[0]
+      }));
+    } catch (err) {
+      console.error('Track Order Error:', err);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        success: false,
+        message: 'Failed to track order'
+      }));
+    }
+  }
+  
+  
+module.exports = { handleOrderRoutes,getMyOrders,placeOrder,cancelOrder,trackOrder };
