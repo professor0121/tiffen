@@ -7,6 +7,7 @@ const { createMenu, getMenu } = require('../controllers/menuController');
 const { giveFeedback } = require('../controllers/feedbackController');
 const { getAllOrders,getAllFeedback,updateOrderStatus } = require('../controllers/adminController');
 const { createSubscription, getSubscription,cancelSubscription } = require('../controllers/subscriptionController');
+const { getStats } = require('../controllers/statsController');
 
 function router(req, res) {
   const { url, method } = req;
@@ -91,7 +92,10 @@ if (url === '/api/subscription/cancel' && method === 'POST') {
     return authMiddleware(req, res, updateOrderStatus);
   }
   
-
+    // Admin Analytics
+    if (pathname === '/api/admin/stats' && method === 'GET') {
+        return authMiddleware(req, res, getStats);
+      }
   // ... other routes ...
 
   // 404 fallback
