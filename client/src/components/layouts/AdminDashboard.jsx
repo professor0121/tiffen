@@ -6,6 +6,8 @@ import Users from '@/components/admin/Users'
 import Settings from '@/components/admin/Settings'
 import Orders from '@/components/admin/Order'
 import Menu from '@/components/admin/Menu'
+import Analytics from '@/components/admin/Analytics'
+import Feedback from '@/components/admin/Feedback'
 
 const Dashboard = () => {
   const [currentView, setCurrentView] = useState('Home')
@@ -17,6 +19,8 @@ const Dashboard = () => {
       case 'Settings': return <Settings />
       case 'Orders': return <Orders />
       case 'Menu': return <Menu />
+      case 'Analytics': return <Analytics />
+      case 'Feedback': return <Feedback />  
       default: return <Home />
     }
   }

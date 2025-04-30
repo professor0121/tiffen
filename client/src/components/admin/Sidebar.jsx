@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Sidebar = ({ currentView, setCurrentView, isOpen }) => {
-    const links = ['Home', 'Users', 'Settings','Reports', 'Analytics','Orders', 'Products','Menu']
+    const links = ['Home', 'Users','Reports', 'Analytics','Orders', 'Products','Menu','Feedback', 'Settings'];
 
 
   return (

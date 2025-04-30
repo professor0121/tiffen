@@ -72,7 +72,7 @@ function router(req, res) {
   }
 
   if (req.method === 'GET' && req.url === '/api/admin/feedback') {
-    return authMiddleware(req, res, getAllFeedback);
+    return authAdminMiddleware(req, res, getAllFeedback);
   }
 
   // Create a subscription
@@ -101,7 +101,7 @@ function router(req, res) {
 
   // Admin Analytics
   if (pathname === '/api/admin/stats' && method === 'GET') {
-    return authMiddleware(req, res, getStats);
+    return authAdminMiddleware(req, res, getStats);
   }
 
   if (req.method === 'POST' && req.url === '/admin/login') {
