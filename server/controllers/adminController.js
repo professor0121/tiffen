@@ -85,6 +85,18 @@ async function loginAdmin(req, res) {
   });
 }
 
+const getAllUsers = async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT id, name, email, phone, address FROM users'); // Select only necessary fields
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, data: rows }));
+  } catch (err) {
+    console.error('Error fetching users:', err);
+    res.writeHead(500, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: false, message: 'Server error while fetching users' }));
+  }
+};
+
 
 async function getAllOrders(req, res) {
   try {
@@ -104,6 +116,8 @@ async function getAllOrders(req, res) {
     res.end(JSON.stringify({ success: false, message: 'Failed to fetch orders' }));
   }
 }
+
+
 
 async function getAllFeedback(req, res) {
     try {
@@ -187,6 +201,6 @@ async function getAllFeedback(req, res) {
   }
   
   
-  module.exports = {loginAdmin, getAllOrders, getAllFeedback ,updateOrderStatus,registerAdmin};
+  module.exports = {loginAdmin, getAllOrders, getAllFeedback ,updateOrderStatus,registerAdmin,getAllUsers};
   
 

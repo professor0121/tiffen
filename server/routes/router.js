@@ -5,9 +5,10 @@ const { handleOrderRoutes, getMyOrders, placeOrder, cancelOrder, trackOrder } = 
 const { authMiddleware } = require('../middlewares/authMiddleware');
 const { createMenu, getMenu } = require('../controllers/menuController');
 const { giveFeedback } = require('../controllers/feedbackController');
-const { getAllOrders, getAllFeedback, updateOrderStatus, loginAdmin, registerAdmin } = require('../controllers/adminController');
+const { getAllOrders, getAllFeedback, updateOrderStatus, loginAdmin, registerAdmin,getAllUsers } = require('../controllers/adminController');
 const { createSubscription, getSubscription, cancelSubscription } = require('../controllers/subscriptionController');
 const { getStats } = require('../controllers/statsController');
+const {authAdminMiddleware}=require('../middlewares/authAdminMiddleware')
 
 function router(req, res) {
   const { url, method } = req;
@@ -23,13 +24,17 @@ function router(req, res) {
     return loginUser(req, res);
   }
 
+  if(url==='/api/admin/allusers' && method==='GET'){
+    return authAdminMiddleware(req,res,getAllUsers)  // Temporarily removing auth for testing
+  }
+
   // Get Today's Menu
   if (url === '/api/menu' && method === 'GET') {
     return getMenu(req, res);
   }
 
-  if (url === '/api/menu' && method === 'POST') {
-    return authMiddleware(req, res, createMenu); // Later add admin check
+  if (url === '/api/admin/menu' && method === 'POST') {
+    return authAdminMiddleware(req, res, createMenu); // Later add admin check
   }
 
   if (req.method === 'POST' && req.url === '/api/order') {
@@ -61,7 +66,9 @@ function router(req, res) {
   }
 
   if (req.method === 'GET' && req.url === '/api/admin/orders') {
-    return authMiddleware(req, res, getAllOrders);
+    // return authMiddleware(req, res, getAllOrders);
+    return authAdminMiddleware(req,res,getAllOrders)  // Temporarily removing auth for testing
+    // return getAllOrders(req, res); // Temporarily removing auth for testing
   }
 
   if (req.method === 'GET' && req.url === '/api/admin/feedback') {
