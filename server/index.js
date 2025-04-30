@@ -10,6 +10,7 @@ dotenv.config();
 const server = http.createServer((req, res) => {
   router(req, res);
 });
+ 
 initSocket(server);
 // Start the server on port 3000
 server.listen(3000, () => {

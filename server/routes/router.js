@@ -5,7 +5,7 @@ const { handleOrderRoutes,getMyOrders,placeOrder,cancelOrder,trackOrder     } = 
 const { authMiddleware } = require('../middlewares/authMiddleware');
 const { createMenu, getMenu } = require('../controllers/menuController');
 const { giveFeedback } = require('../controllers/feedbackController');
-const { getAllOrders,getAllFeedback,updateOrderStatus } = require('../controllers/adminController');
+const { getAllOrders,getAllFeedback,updateOrderStatus ,loginAdmin,registerAdmin} = require('../controllers/adminController');
 const { createSubscription, getSubscription,cancelSubscription } = require('../controllers/subscriptionController');
 const { getStats } = require('../controllers/statsController');
 
@@ -95,6 +95,13 @@ if (url === '/api/subscription/cancel' && method === 'POST') {
     // Admin Analytics
     if (pathname === '/api/admin/stats' && method === 'GET') {
         return authMiddleware(req, res, getStats);
+      }
+    
+      if (req.method === 'POST' && req.url === '/admin/login') {
+        return loginAdmin(req, res);
+      }
+      if (req.method === 'POST' && req.url === '/admin/register') {
+        return registerAdmin();
       }
   // ... other routes ...
 

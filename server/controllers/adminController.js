@@ -1,5 +1,89 @@
 const db = require('../utils/db');
+const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+require('dotenv').config();
 const { emitOrderStatus } = require('../socket/socket');
+
+async function registerAdmin() {
+  const name = process.env.ADMIN_NAME;
+  const email = process.env.ADMIN_EMAIL;
+  const plainPassword = process.env.ADMIN_PASSWORD;
+
+  if (!name || !email || !plainPassword) {
+    console.error('Missing ADMIN credentials in .env file.');
+    return;
+  }
+
+  try {
+    // Check if admin already exists
+    const [rows] = await db.query('SELECT id FROM admins WHERE email = ?', [email]);
+    if (rows.length > 0) {
+      console.log('Admin already exists.');
+      return;
+    }
+
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+    // Insert admin
+    await db.query(
+      'INSERT INTO admins (name, email, password) VALUES (?, ?, ?)',
+      [name, email, hashedPassword]
+    );
+
+    console.log('Admin registered successfully.');
+  } catch (err) {
+    console.error('Error registering admin:', err);
+  }
+}
+
+async function loginAdmin(req, res) {
+  let body = '';
+  req.on('data', chunk => body += chunk);
+  req.on('end', async () => {
+    try {
+      const { email, password } = JSON.parse(body);
+      if (!email || !password) {
+        res.writeHead(400, {'Content-Type':'application/json'});
+        return res.end(JSON.stringify({ success: false, message: 'Email & Password required' }));
+      }
+
+      // Fetch admin
+      const [rows] = await db.query(
+        'SELECT id, password FROM admins WHERE email = ?',
+        [email]
+      );
+
+      if (rows.length === 0) {
+        res.writeHead(401, {'Content-Type':'application/json'});
+        return res.end(JSON.stringify({ success: false, message: 'Invalid credentials' }));
+      }
+
+      const admin = rows[0];
+
+      // Compare password
+      const ok = await bcrypt.compare(password, admin.password);
+      if (!ok) {
+        res.writeHead(401, {'Content-Type':'application/json'});
+        return res.end(JSON.stringify({ success: false, message: 'Invalid credentials' }));
+      }
+
+      // Generate token
+      const token = crypto.randomBytes(16).toString('hex');
+      await db.query('UPDATE admins SET token = ? WHERE id = ?', [token, admin.id]);
+
+      // Respond
+      res.writeHead(200, {'Content-Type':'application/json'});
+      res.end(JSON.stringify({ success: true, message: 'Admin login successful', token }));
+
+    } catch (err) {
+      console.error(err);
+      res.writeHead(500, {'Content-Type':'application/json'});
+      res.end(JSON.stringify({ success: false, message: 'Server error' }));
+    }
+  });
+}
+
 
 async function getAllOrders(req, res) {
   try {
@@ -102,6 +186,6 @@ async function getAllFeedback(req, res) {
   }
   
   
-  module.exports = { getAllOrders, getAllFeedback ,updateOrderStatus};
+  module.exports = {loginAdmin, getAllOrders, getAllFeedback ,updateOrderStatus,registerAdmin};
   
 

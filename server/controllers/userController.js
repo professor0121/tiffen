@@ -3,12 +3,14 @@ const db = require('../utils/db');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
-async function registerUser(req, res) {
+async function  registerUser(req, res) {
   let body = '';
   req.on('data', chunk => body += chunk);
+  console.log("this is body sended by client",body)
   req.on('end', async () => {
     try {
       const { name, email, phone, password, address } = JSON.parse(body);
+      console.log(name, email,phone,password,address)
       if (!name || !email || !password) {
         res.writeHead(400, {'Content-Type':'application/json'});
         return res.end(JSON.stringify({ success:false, message:'Name, Email & Password required' }));

@@ -54,3 +54,15 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   end_date DATE,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+-- Create Admin Table
+CREATE TABLE IF NOT EXISTS admins (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role VARCHAR(50) DEFAULT 'admin', -- e.g., 'admin', 'superadmin'
+  token TEXT, -- for login sessions or password reset
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
