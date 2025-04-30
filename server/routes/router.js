@@ -1,20 +1,20 @@
 // routes/router.js
 const { URL } = require('url');
 const { registerUser, loginUser } = require('../controllers/userController');
-const { handleOrderRoutes,getMyOrders,placeOrder,cancelOrder,trackOrder     } = require('../controllers/orderController');
+const { handleOrderRoutes, getMyOrders, placeOrder, cancelOrder, trackOrder } = require('../controllers/orderController');
 const { authMiddleware } = require('../middlewares/authMiddleware');
 const { createMenu, getMenu } = require('../controllers/menuController');
 const { giveFeedback } = require('../controllers/feedbackController');
-const { getAllOrders,getAllFeedback,updateOrderStatus ,loginAdmin,registerAdmin} = require('../controllers/adminController');
-const { createSubscription, getSubscription,cancelSubscription } = require('../controllers/subscriptionController');
+const { getAllOrders, getAllFeedback, updateOrderStatus, loginAdmin, registerAdmin } = require('../controllers/adminController');
+const { createSubscription, getSubscription, cancelSubscription } = require('../controllers/subscriptionController');
 const { getStats } = require('../controllers/statsController');
 
 function router(req, res) {
   const { url, method } = req;
-    console.log(`Request URL: ${url}, Method: ${method}`);
-    const fullUrl = `http://${req.headers.host}${req.url}`;
-    const parsed = new URL(fullUrl);
-    const pathname = parsed.pathname;
+  console.log(`Request URL: ${url}, Method: ${method}`);
+  const fullUrl = `http://${req.headers.host}${req.url}`;
+  const parsed = new URL(fullUrl);
+  const pathname = parsed.pathname;
 
   if (url === '/api/users/register' && method === 'POST') {
     return registerUser(req, res);
@@ -31,11 +31,11 @@ function router(req, res) {
   if (url === '/api/menu' && method === 'POST') {
     return authMiddleware(req, res, createMenu); // Later add admin check
   }
-  
+
   if (req.method === 'POST' && req.url === '/api/order') {
     return authMiddleware(req, res, placeOrder);
   }
-  
+
 
   if (url === '/api/orders' && method === 'GET') {
     return authMiddleware(req, res, getMyOrders);
@@ -67,9 +67,9 @@ function router(req, res) {
   if (req.method === 'GET' && req.url === '/api/admin/feedback') {
     return authMiddleware(req, res, getAllFeedback);
   }
-  
-   // Create a subscription
-   if (url === '/api/subscription' && method === 'POST') {
+
+  // Create a subscription
+  if (url === '/api/subscription' && method === 'POST') {
     return authMiddleware(req, res, createSubscription);
   }
 
@@ -77,12 +77,12 @@ function router(req, res) {
   if (url === '/api/subscription' && method === 'GET') {
     return authMiddleware(req, res, getSubscription);
   }
-  
+
   // Cancel Subscription
-if (url === '/api/subscription/cancel' && method === 'POST') {
+  if (url === '/api/subscription/cancel' && method === 'POST') {
     return authMiddleware(req, res, cancelSubscription);
   }
-  
+
   if (pathname === '/api/order/status' && method === 'GET') {
     req.orderId = parsed.searchParams.get('order_id');
     return authMiddleware(req, res, trackOrder);
@@ -91,18 +91,18 @@ if (url === '/api/subscription/cancel' && method === 'POST') {
   if (pathname === '/api/admin/order/status' && method === 'PATCH') {
     return authMiddleware(req, res, updateOrderStatus);
   }
-  
-    // Admin Analytics
-    if (pathname === '/api/admin/stats' && method === 'GET') {
-        return authMiddleware(req, res, getStats);
-      }
-    
-      if (req.method === 'POST' && req.url === '/admin/login') {
-        return loginAdmin(req, res);
-      }
-      if (req.method === 'POST' && req.url === '/admin/register') {
-        return registerAdmin();
-      }
+
+  // Admin Analytics
+  if (pathname === '/api/admin/stats' && method === 'GET') {
+    return authMiddleware(req, res, getStats);
+  }
+
+  if (req.method === 'POST' && req.url === '/admin/login') {
+    return loginAdmin(req, res);
+  }
+  if (req.method === 'POST' && req.url === '/admin/register') {
+    return registerAdmin();
+  }
   // ... other routes ...
 
   // 404 fallback

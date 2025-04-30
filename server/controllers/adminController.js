@@ -49,6 +49,7 @@ async function loginAdmin(req, res) {
       }
 
       // Fetch admin
+      
       const [rows] = await db.query(
         'SELECT id, password FROM admins WHERE email = ?',
         [email]
